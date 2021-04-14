@@ -1,0 +1,8 @@
+# Python
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+
+# Project secrets and configuration
+.env
+/avmon.cfg.toml
