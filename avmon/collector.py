@@ -1,13 +1,14 @@
 from typing import Callable, Awaitable, NoReturn
 
-from aioscheduler import TimedScheduler
-from aiokafka import AIOKafkaProducer
 import aiohttp
 import asyncio
 from asyncio.exceptions import TimeoutError
 import time
 import re
+import logging
 
+
+from . import kafka
 from . import config
 from .message import EndpointStatus
 
@@ -62,6 +63,16 @@ async def endpoint_task(
                     time_start=start_real,
                     time_end=start_real + (time.monotonic() - start_monotonic),
                 )
+            except aiohttp.client_exceptions.ServerDisconnectedError as e:
+                result = EndpointStatus(
+                    url=cfg.url,
+                    reached=False,
+                    error="server disconnected",
+                    status=None,
+                    regex_match=None,
+                    time_start=start_real,
+                    time_end=start_real + (time.monotonic() - start_monotonic),
+                )
 
             await output(result)
 
@@ -72,13 +83,15 @@ async def endpoint_task(
 async def main():
     cfg = config.load_or_die()
 
-    producer = AIOKafkaProducer(bootstrap_servers="localhost:9092")
-    await producer.start()
+    producer = await kafka.producer()
+
     try:
 
         async def send(msg: EndpointStatus) -> None:
+            logging.debug(f"Sending event {msg !r}")
             await producer.send_and_wait("messages", msg.to_json().encode())
 
+        logging.debug(f"Starting endpoint pollers")
         await asyncio.gather(*(endpoint_task(endpoint, send) for endpoint in cfg))
     finally:
         await producer.stop()

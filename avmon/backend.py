@@ -1,24 +1,17 @@
 import datetime
 import asyncio
-import asyncpg
-from aiokafka import AIOKafkaConsumer
 
 from .message import EndpointStatus
-from . import postgres
+from . import postgres, kafka
 from . import config
 
 
 async def main():
     config.load_dotenv()
 
-    consumer = AIOKafkaConsumer(
-        "messages",
-        bootstrap_servers="localhost:9092",
-    )
-
     conn = await postgres.connect()
+    consumer = await kafka.consumer("messages")
 
-    await consumer.start()
     try:
         async for msg in consumer:
             if msg.topic == "messages":

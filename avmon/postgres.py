@@ -1,6 +1,7 @@
 from os import environ
 import asyncio
 import asyncpg
+import logging
 
 
 async def init_sql(conn) -> None:
@@ -21,13 +22,30 @@ async def init_sql(conn) -> None:
 
 
 async def connect() -> asyncpg.Connection:
-    conn = await asyncpg.connect(
-        user=environ["POSTGRES_USER"],
-        password=environ["POSTGRES_PASSWORD"],
-        database=environ.get("POSTGRES_DB", "avmon"),
-        host=environ.get("POSTGRES_HOST", "127.0.0.1"),
-    )
+    for _ in range(120):
+        try:
+            conn = await asyncpg.connect(
+                user=environ["POSTGRES_USER"],
+                password=environ["POSTGRES_PASSWORD"],
+                database=environ.get("POSTGRES_DB", "avmon"),
+                host=environ.get("POSTGRES_HOST", "127.0.0.1"),
+            )
+            break
+        except:
+            # Postgres is still down, has user set variable that allows us to wait for it?
+            if environ.get("AVMON_WAIT_FOR_DBS", "0") == "0":
+                raise
+            else:
+                logging.warning("Could not connect to Postgres, retrying after 1s")
+                await asyncio.sleep(1.0)
+    else:  # No break
+        logging.critical("Could not connect to Posgres after retrying")
+        exit("Could not connect to Posgres after retrying")
+
+    logging.info("Connected to Postgres, creating tables")
 
     await init_sql(conn)
+
+    logging.info("Tables created")
 
     return conn
