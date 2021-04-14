@@ -1,29 +1,29 @@
-# Default poll interval for site
+# Default poll interval for endpoint
 interval = 60
 
-[[site]]
+[[endpoint]]
 url = "https://aiven.io/"
 description = "Aiven"
 
-[[site]]
+[[endpoint]]
 url = "https://google.com/"
 description = "Google"
 
-[[site]]
+[[endpoint]]
 interval = 45 # Overwrite interval
 url = "https://worldtimeapi.org/api/ip.txt"
 description = "Current time for client IP"
 # Match time with even number of minutes
 regex = "datetime: \\d+-\\d+-\\d+T\\d+:\\d+"
 
-[[site]]
+[[endpoint]]
 url = "http://httpbin.org/status/200,500"
 description = "Randomly failing endpoint"
 
-[[site]]
+[[endpoint]]
 url = "http://httpbin.org/status/400"
 description = "Always failing endpoint"
 
-[[site]]
+[[endpoint]]
 url = "http://httpbin.org/delay/10"
 description = "Endpoint with a 10 second delay"
