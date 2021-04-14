@@ -119,7 +119,7 @@ async def single(request: web.Request) -> web.Response:
 
 
 def init_app() -> web.Application:
-    cfg = config.load_or_die()
+    config.load_dotenv()
     app = web.Application()
     app.add_routes(routes)
     app.cleanup_ctx.append(init_db)

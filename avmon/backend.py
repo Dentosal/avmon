@@ -1,5 +1,4 @@
 import datetime
-from os import environ
 import asyncio
 import asyncpg
 from aiokafka import AIOKafkaConsumer
@@ -10,7 +9,7 @@ from . import config
 
 
 async def main():
-    cfg = config.load_or_die()
+    config.load_dotenv()
 
     consumer = AIOKafkaConsumer(
         "messages",
