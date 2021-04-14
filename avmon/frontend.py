@@ -13,10 +13,13 @@ from . import config
 
 routes = web.RouteTableDef()
 
+HEADERS = {"Cache-Control": "no-cache"}
+
+with open("avmon/frontend.html") as f:
+    HTML_TEMPLATE = f.read()
+
 
 def make_html(body):
-    with open("avmon/frontend.html") as f:
-        HTML_TEMPLATE = f.read()
     return HTML_TEMPLATE.replace("$CONTENT", body)
 
 
@@ -63,7 +66,7 @@ async def all(request: web.Request) -> web.Response:
         body += "</tr>"
     body += "</table>"
 
-    return web.Response(text=make_html(body), content_type="text/html")
+    return web.Response(text=make_html(body), content_type="text/html", headers=HEADERS)
 
 
 @routes.get("/{url}")
@@ -115,7 +118,7 @@ async def single(request: web.Request) -> web.Response:
         body += '<a href="?limit=' + str(limit + 10) + '">Show more</a>'
         body += "</p>"
 
-    return web.Response(text=make_html(body), content_type="text/html")
+    return web.Response(text=make_html(body), content_type="text/html", headers=HEADERS)
 
 
 def init_app() -> web.Application:
