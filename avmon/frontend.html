@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvMon</title>
+    <meta http-equiv="refresh" content="15">
+    <style>
+        body {
+            font: 1.2rem;
+        }
+        th, td {
+            margin: 0.5rem;
+            padding: 0.5rem;
+        }
+        td:not(:first-child) {
+            text-align: center;
+        }
+        td.error, tr.unreachable td.reached {
+            background-color: #d00;
+        }
+        td.ok {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        $CONTENT
+    </div>
+</body>
+</html>

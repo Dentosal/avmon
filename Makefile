@@ -28,3 +28,9 @@ run-backend:
 
 run-both:
 	@${PYTHON} -m avmon.both
+
+run-frontend:
+	@${PYTHON} -m avmon.frontend
+
+run-all:
+	@${PYTHON} -m avmon.all
