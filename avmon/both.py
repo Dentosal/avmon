@@ -1,7 +1,6 @@
 import asyncio
 
-from . import collector
-from . import backend
+from . import collector, backend
 
 
 async def main():

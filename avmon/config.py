@@ -5,6 +5,7 @@ import toml
 from urllib.parse import urlparse
 from dataclasses import dataclass
 from os import environ
+from dotenv import load_dotenv
 
 CFG_ENV_VAR = "AVMON_CFG"
 DEFAULT_CFG_PATH = "./avmon.cfg.toml"
@@ -42,6 +43,8 @@ def load():
     Uses AVMON_CFG environment variable to locate config file,
     defaults to DEFAULT_CFG_PATH if not set.
     """
+
+    load_dotenv()
 
     with open(environ.get(CFG_ENV_VAR, DEFAULT_CFG_PATH)) as f:
         cfg = toml.load(f)
