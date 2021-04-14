@@ -19,11 +19,13 @@ async def endpoint_task(
 
     async with aiohttp.ClientSession() as session:
         while True:
-            start_time = time.monotonic()
+            start_real = time.time()
+            start_monotonic = time.monotonic()
 
             result: EndpointStatus
 
             try:
+                print(">>", cfg.url)
                 async with session.get(cfg.url, timeout=2.0) as response:
                     # Check if regex can be found in the body
                     is_match = None
@@ -37,8 +39,8 @@ async def endpoint_task(
                         error=None,
                         status=response.status,
                         regex_match=is_match,
-                        time_start=start_time,
-                        time_end=time.monotonic(),
+                        time_start=start_real,
+                        time_end=start_real + (time.monotonic() - start_monotonic),
                     )
             except TimeoutError:
                 result = EndpointStatus(
@@ -47,13 +49,23 @@ async def endpoint_task(
                     error="timeout",
                     status=None,
                     regex_match=None,
-                    time_start=start_time,
-                    time_end=time.monotonic(),
+                    time_start=start_real,
+                    time_end=start_real + (time.monotonic() - start_monotonic),
+                )
+            except aiohttp.client_exceptions.ClientConnectorError as e:
+                result = EndpointStatus(
+                    url=cfg.url,
+                    reached=False,
+                    error="couldn't connect",
+                    status=None,
+                    regex_match=None,
+                    time_start=start_real,
+                    time_end=start_real + (time.monotonic() - start_monotonic),
                 )
 
             await output(result)
 
-            duration = time.monotonic() - start_time
+            duration = time.monotonic() - start_monotonic
             await asyncio.sleep(max(0, cfg.interval - duration))
 
 
