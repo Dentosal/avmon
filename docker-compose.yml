@@ -10,6 +10,8 @@ services:
             - AVMON_ROLE=collector
             - AVMON_WAIT_FOR_DBS=1
             - AVMON_KAFKA=kafka
+        volumes:
+          - ${PWD}/avmon.cfg.toml:/app/avmon.cfg.toml
         depends_on:
             - backend
             - kafka
