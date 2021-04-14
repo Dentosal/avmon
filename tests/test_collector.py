@@ -15,6 +15,7 @@ async def test_endpoint_task():
 
     cfg = EndpointConfig(
         interval=0.000001,
+        timeout=1.0,
         description="test",
         url=f"http://localhost:{port}",
         regex=None,

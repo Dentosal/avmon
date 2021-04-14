@@ -18,6 +18,9 @@ class EndpointConfig:
     # Poll interval in seconds
     interval: int
 
+    # Timeout in seconds
+    timeout: float
+
     # Description of the endpoint
     description: str
 
@@ -49,11 +52,19 @@ def load():
     with open(environ.get(CFG_ENV_VAR, DEFAULT_CFG_PATH)) as f:
         cfg = toml.load(f)
 
+    # Default interval
     default_interval = 60  # Once per minute
     if interval := cfg.get("interval"):
         if not isinstance(interval, int) or interval < 0:
             raise FieldValidationError("interval", "positive integer required")
 
+    # Default timeout
+    default_timeout = 10
+    if timeout := cfg.get("timeout"):
+        if not isinstance(timeout, (int, float)) or timeout < 0:
+            raise FieldValidationError("timeout", "positive number required")
+
+    # Per-endpoint configuration
     endpoints = []
     for i, endpoint in enumerate(cfg.get("endpoint", [])):
         description = endpoint.get("description")
@@ -95,11 +106,20 @@ def load():
         else:
             interval = default_interval
 
+        if timeout := endpoint.get("timeout"):
+            if not isinstance(timeout, (float, int)) or timeout < 0:
+                raise FieldValidationError(
+                    "endpoint.timeout", "positive number required"
+                )
+        else:
+            timeout = default_timeout
+
         endpoints.append(
             EndpointConfig(
                 url=endpoint["url"],
                 description=description,
                 interval=interval,
+                timeout=timeout,
                 regex=regex,
             )
         )

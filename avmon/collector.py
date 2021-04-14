@@ -27,7 +27,7 @@ async def endpoint_task(
 
             try:
                 print(">>", cfg.url)
-                async with session.get(cfg.url, timeout=2.0) as response:
+                async with session.get(cfg.url, timeout=cfg.timeout) as response:
                     # Check if regex can be found in the body
                     is_match = None
                     if r := cfg.regex:
