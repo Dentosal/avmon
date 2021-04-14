@@ -1,5 +1,7 @@
 PYTHON=python3.8
 
+# Formatting and typecheck
+
 format:
 	@${PYTHON} -m black avmon/ tests/
 
@@ -11,14 +13,35 @@ type-check:
 
 check: format-check type-check
 
+# Tests
+
 test:
 	@${PYTHON} -m pytest
+
+# Git hooks
+
+pre-commit: check
+
+pre-push: pre-commit test
+
+install-git-hooks:
+	@printf "make pre-commit" > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+	@printf "make pre-push" > .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+	@echo "git hooks installed"
+
+# Dependencies
 
 install-deps:
 	@${PYTHON} -m pip install --user -r requirements.txt
 
 install-deps-dev: install-deps
 	@${PYTHON} -m pip install --user -r requirements-dev.txt
+
+# Setup
+
+dev-setup: install-deps-dev install-git-hooks
+
+# Running locally
 
 run-collector:
 	@${PYTHON} -m avmon.collector
@@ -34,3 +57,5 @@ run-frontend:
 
 run-all:
 	@${PYTHON} -m avmon.all
+
+# Running in docker
