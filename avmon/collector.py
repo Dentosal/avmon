@@ -89,7 +89,7 @@ async def main():
 
         async def send(msg: EndpointStatus) -> None:
             logging.debug(f"Sending event {msg !r}")
-            await producer.send_and_wait("messages", msg.to_json().encode())
+            await producer.send("messages", msg.to_json().encode())
 
         logging.debug(f"Starting endpoint pollers")
         await asyncio.gather(*(endpoint_task(endpoint, send) for endpoint in cfg))
