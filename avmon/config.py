@@ -55,7 +55,7 @@ def load():
             raise FieldValidationError("interval", "positive integer required")
 
     endpoints = []
-    for i, endpoint in enumerate(cfg["endpoint"]):
+    for i, endpoint in enumerate(cfg.get("endpoint", [])):
         description = endpoint.get("description")
         if description:
             description.strip()
