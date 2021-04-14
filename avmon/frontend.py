@@ -136,8 +136,9 @@ async def init_db(app: web.Application) -> AsyncIterator[None]:
 async def main():
     runner = web.AppRunner(init_app())
     await runner.setup()
-    site = web.TCPSite(runner, "localhost", 8080)
+    site = web.TCPSite(runner, "0.0.0.0", 8080)
     await site.start()
+    await asyncio.Event().wait()  # forever
 
 
 if __name__ == "__main__":
