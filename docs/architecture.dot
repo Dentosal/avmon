@@ -1,0 +1,20 @@
+digraph A {
+    rankdir = LR;
+
+    c_a [shape=rect,label="Collector"]
+    c_b [shape=rect,label="Collector"]
+    c_c [shape=rect,label="Collector"]
+    kafka [shape=cylinder,label="Kafka"]
+    postgres [shape=cylinder,label="PostgreSQL"]
+    main [shape=rect,label="Main"]
+    viz [shape=rect,label="Visualization"]
+
+    {postgres; viz; rank=same}
+
+    c_a -> kafka
+    c_b -> kafka
+    c_c -> kafka
+    kafka -> main
+    main -> postgres
+    postgres -> viz [dir=none]
+}

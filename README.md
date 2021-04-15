@@ -2,6 +2,8 @@
 
 A microservice-based HTTP endpoint monitor using [Python](https://python.org/) for the actual code, [Apache Kafka](https://kafka.apache.org/) for combining multi-writer events into a single queue and [PostgreSQL](https://www.postgresql.org/) for long-term data storage.
 
+![Architecture diagram](docs/architecture.svg)
+
 Project is dockerized using single container, switched to perform different functions with the `AVMON_ROLE` environment variable.
 
 ## Running

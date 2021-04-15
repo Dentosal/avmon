@@ -1,5 +1,10 @@
 PYTHON=python3.8
 
+# All targets are PHONY
+
+.PHONY: all $(MAKECMDGOALS)
+
+
 # Formatting and typecheck
 
 format:
@@ -68,3 +73,8 @@ docker-dbs:
 
 docker-down:
 	@docker-compose down -v || docker-compose kill
+
+# Documentation
+
+dot:
+	@for file in docs/*.dot; do dot -Tsvg "$$file" > "docs/$$(basename "$$file" .dot).svg"; done
