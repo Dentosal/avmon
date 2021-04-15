@@ -1,4 +1,4 @@
-PYTHON=python3.8
+PYTHON=python3
 
 # All targets are PHONY
 
