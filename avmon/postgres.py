@@ -29,6 +29,7 @@ async def _repeat_connect(fn) -> asyncpg.Connection:
                 password=environ["POSTGRES_PASSWORD"],
                 database=environ.get("POSTGRES_DB", "avmon"),
                 host=environ.get("POSTGRES_HOST", "127.0.0.1"),
+                port=int(environ.get("POSTGRES_PORT", "5432")),
             )
             break
         except:
