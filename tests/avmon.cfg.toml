@@ -1,0 +1,17 @@
+[[endpoint]]
+interval = 2
+timeout = 2
+url = "https://httpbin.org/status/200"
+description = "The site itself"
+
+[[endpoint]]
+interval = 2
+timeout = 2
+url = "https://httpbin.org/status/400"
+description = "The site itself"
+
+[[endpoint]]
+interval = 2
+timeout = 1
+url = "https://httpbin.org/delay/5"
+description = "The site itself"

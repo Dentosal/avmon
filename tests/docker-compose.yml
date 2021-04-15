@@ -1,0 +1,9 @@
+# Overwrites for the E2E tests
+
+version: '3'
+
+services:
+
+    collector:
+        volumes:
+          - ${PWD}/tests/avmon.cfg.toml:/app/avmon.cfg.toml
