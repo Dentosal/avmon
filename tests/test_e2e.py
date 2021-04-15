@@ -12,6 +12,11 @@ from avmon.config import EndpointConfig
 @contextmanager
 def infra():
     """Test with full infrastructure."""
+
+    output = subprocess.check_output(["docker-compose", "ps", "-q"])
+    if output.strip():
+        raise RuntimeError("Please stop running containers before E2E tests")
+
     subprocess.run(
         [
             "docker-compose",
@@ -61,6 +66,7 @@ async def test_e2e():
 
                             elif "/status/400" in fields[0]:
                                 assert fields[2] == "400"
+
                 except Exception as e:
                     print("Failed with", e)
                     print("Trying again...")
