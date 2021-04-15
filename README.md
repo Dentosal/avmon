@@ -4,7 +4,7 @@ A microservice-based HTTP endpoint monitor using [Python](https://python.org/) f
 
 ![Architecture diagram](docs/architecture.svg)
 
-Project is dockerized using a single container, switched to perform different functions with the `AVMON_ROLE` environment variable. Collector components are configured using a mounted config file.
+The project is dockerized using a single container, which is switched to perform different functions with the `AVMON_ROLE` environment variable. Collector components are configured using a mounted config file.
 
 ## Running
 
@@ -14,13 +14,13 @@ A minimal local system (one of each component) can be started with:
 make create-dotenv docker-up
 ```
 
-or even smaller system without dockerizing the application itself, running all Python services in a single process:
+or even smaller system without dockerizing the application itself, running all Python services in a single process (requires Python >= 3.8):
 
 ```bash
 make create-dotenv install-deps docker-dbs run-all
 ```
 
-In either case, navigate to https://localhost:8080/ for the visualization.
+In either case, navigate to https://localhost:8080/ for the visualization. Then proceed to tweak the [configuration file](avmon.cfg.toml) to include sites you would like to monitor.
 
 ### Using external databases
 
@@ -84,8 +84,6 @@ The project uses [Black](https://github.com/psf/black) for code formatting to en
 ### Tests
 
 `make test` runs the whole test suite, which takes quite some time. Use `python -m pytest -k testname` to run one test at a time. `python -m pytest -s` can be used to see test output while the test is still running. Please note that the E2E tests use docker-compose to manage environment and cannot be ran if the system is already running.
-
-
 
 ## License
 
