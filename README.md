@@ -12,11 +12,10 @@ Minimal local system (one of each component) can be started with:
 docker-compose up
 ```
 
-or even smaller system without docker, running all Python services in a single process:
+or even smaller system without dockerizing the application itself, running all Python services in a single process:
 
 ```bash
-docker-compose -f docker-compose-dbs.yml up -d
-make install-deps run-all
+make install-deps docker-dbs run-all
 ```
 
 In either case, navigate to https://localhost:8080/ for the visualization.
@@ -28,8 +27,14 @@ In either case, navigate to https://localhost:8080/ for the visualization.
     * `backend.py` - Receives events from Kafka and writes them to a Postgres database.
     * `frontend.py` - Simple visualization frentend
 * `tests/` - Integration / E2E tests
+* `docker-compose.yml` - Docker-compose-file for running the project normally
+* `docker-compose-dbs.yml` - Docker-compose-file for running only the databases in Docker
+* `Dockerfile` - Dockerfile to containerize
+* `Makefile` - Convenient shortcut commands
 
 ## Development
+
+Required: Python (>= 3.8), and Docker + Docker-compose
 
 To start, run
 
