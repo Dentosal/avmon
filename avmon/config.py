@@ -1,4 +1,4 @@
-from typing import Optional, Pattern
+from typing import List, Optional, Pattern
 
 import re
 import toml
@@ -40,14 +40,15 @@ class FieldValidationError(Exception):
         super().__init__(field + ": " + self.message)
 
 
-def load():
+def load(dotenv: bool = True) -> List[EndpointConfig]:
     """
     Loads configuration from file.
     Uses AVMON_CFG environment variable to locate config file,
     defaults to DEFAULT_CFG_PATH if not set.
     """
 
-    load_dotenv()
+    if dotenv:
+        load_dotenv()
 
     with open(environ.get(CFG_ENV_VAR, DEFAULT_CFG_PATH)) as f:
         cfg = toml.load(f)
