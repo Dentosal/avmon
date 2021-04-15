@@ -6,7 +6,7 @@ digraph A {
     c_c [shape=rect,label="Collector"]
     kafka [shape=cylinder,label="Kafka"]
     postgres [shape=cylinder,label="PostgreSQL"]
-    main [shape=rect,label="Main"]
+    backend [shape=rect,label="Backend"]
     viz [shape=rect,label="Visualization"]
 
     {postgres; viz; rank=same}
@@ -14,7 +14,7 @@ digraph A {
     c_a -> kafka
     c_b -> kafka
     c_c -> kafka
-    kafka -> main
-    main -> postgres
+    kafka -> backend
+    backend -> postgres
     postgres -> viz [dir=none]
 }

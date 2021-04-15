@@ -4,7 +4,7 @@ A microservice-based HTTP endpoint monitor using [Python](https://python.org/) f
 
 ![Architecture diagram](docs/architecture.svg)
 
-Project is dockerized using a single container, switched to perform different functions with the `AVMON_ROLE` environment variable.
+Project is dockerized using a single container, switched to perform different functions with the `AVMON_ROLE` environment variable. Collector components are configured using a mounted config file.
 
 ## Running
 
@@ -36,15 +36,28 @@ In either case, navigate to https://localhost:8080/ for the visualization.
 
 ## Development
 
-Required: Python (>= 3.8), and Docker + Docker-compose
+Requireds Python (>= 3.8), and Docker + Docker-compose. Most of the commands are rather \*nix-specific, so Linux or macOS is recommended.
 
-To start, run
+### Setup
 
 ```bash
 make dev-setup
 ```
 
-this installs the dev dependencies locally, and installs git hooks that make sure you will not commit unformatted code or push untested code.
+Installs the dev dependencies locally. It also creates git hooks that make sure you will not commit unformatted code or push untested code.
+
+### Formatter
+
+The project uses [Black](https://github.com/psf/black) for code formatting to ensure uniform style. To automatically format code, run `make format`.
+
+### Type checking
+
+[Mypy](http://mypy-lang.org/) is used for type checking. To make sure you have not introduced type errors, run `make type-check`.
+
+### Tests
+
+`make test` runs the whole test suite, which takes quite some time. Use `python -m pytest -k testname` to run one test at a time. `python -m pytest -s` can be used to see test output while the test is still running. Please note that the E2E tests use docker-compose to manage environment and cannot be ran if the system is already running.
+
 
 
 ## License
