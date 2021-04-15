@@ -11,6 +11,8 @@ if __name__ == "__main__":
         from .backend import main
     elif role == "frontend":
         from .frontend import main
+    else:
+        exit(f"AVMON_ROLE {role !r} unknown")
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
