@@ -44,15 +44,22 @@ Remote databases must also be set up properly. Usually that means at least that 
 
 ## Project structure
 
-* `avmon/` - Python packages
-    * `collector.py` - Polls the sites and pushes the results to Kafka. Has own config, parallelizes well.
-    * `backend.py` - Receives events from Kafka and writes them to a Postgres database.
-    * `frontend.py` - Simple visualization frentend
-* `tests/` - Integration / E2E tests
-* `docker-compose.yml` - Docker-compose-file for running the project normally
-* `docker-compose-dbs.yml` - Docker-compose-file for running only the databases in Docker
-* `Dockerfile` - Dockerfile to containerize
-* `Makefile` - Convenient shortcut commands
+Most important project files are:
+
+* [`avmon/`](avmon/) - Python modules
+    * [`collector.py`](avmon/collector.py) - Polls the sites and pushes the results to Kafka. Has own config, parallelizes well.
+    * [`backend.py`](avmon/backend.py) - Receives events from Kafka and writes them to a Postgres database.
+    * [`frontend.py`](avmon/frontend.py) - Simple visualization frentend
+    * [`frontend.html`](avmon/frontend.html) - Frontend HTML template
+* [`tests/`](tests/) - Integration / E2E tests
+* [`requirements.txt`](requirements.txt) - Runtime Python package dependencies
+* [`requirements-dev.txt`](requirements-dev.txt) - Development Python package dependencies
+* [`docker-compose.yml`](docker-compose.yml) - Docker-compose-file for running the project normally
+* [`docker-compose-dbs.yml`](docker-compose-dbs.yml) - Docker-compose-file for running only the databases in Docker
+* [`Dockerfile`](Dockerfile) - Dockerfile to containerize this project
+* [`Makefile`](Makefile) - Convenient shortcut commands
+* [`avmon.cfg.toml`](avmon.cfg.toml) - Example configuration file
+* [`docs/`](docs/) - Auxiliary documentation files
 
 ## Development
 
