@@ -4,4 +4,5 @@ __pycache__/
 .pytest_cache/
 
 # Project secrets and configuration
-.env
+.env*
+keys/
