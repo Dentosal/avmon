@@ -45,6 +45,9 @@ services:
 
     postgres:
         image: "postgres"
+        environment:
+            - POSTGRES_USER=user
+            - POSTGRES_DB=avmon
         env_file:
             - .env
         ports:

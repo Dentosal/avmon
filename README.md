@@ -11,13 +11,13 @@ Project is dockerized using a single container, switched to perform different fu
 A minimal local system (one of each component) can be started with:
 
 ```bash
-docker-compose up
+make create-dotenv docker-up
 ```
 
 or even smaller system without dockerizing the application itself, running all Python services in a single process:
 
 ```bash
-make install-deps docker-dbs run-all
+make create-dotenv install-deps docker-dbs run-all
 ```
 
 In either case, navigate to https://localhost:8080/ for the visualization.

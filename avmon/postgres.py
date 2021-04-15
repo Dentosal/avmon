@@ -24,8 +24,16 @@ async def init_sql(conn) -> None:
 async def connect() -> asyncpg.Connection:
     for _ in range(120):
         try:
+            print(
+                dict(
+                    user=environ.get("POSTGRES_USER", "user"),
+                    password=environ["POSTGRES_PASSWORD"],
+                    database=environ.get("POSTGRES_DB", "avmon"),
+                    host=environ.get("POSTGRES_HOST", "127.0.0.1"),
+                )
+            )
             conn = await asyncpg.connect(
-                user=environ["POSTGRES_USER"],
+                user=environ.get("POSTGRES_USER", "user"),
                 password=environ["POSTGRES_PASSWORD"],
                 database=environ.get("POSTGRES_DB", "avmon"),
                 host=environ.get("POSTGRES_HOST", "127.0.0.1"),
@@ -39,8 +47,8 @@ async def connect() -> asyncpg.Connection:
                 logging.warning("Could not connect to Postgres, retrying after 1s")
                 await asyncio.sleep(1.0)
     else:  # No break
-        logging.critical("Could not connect to Posgres after retrying")
-        exit("Could not connect to Posgres after retrying")
+        logging.critical("Could not connect to Postgres after retrying")
+        exit("Could not connect to Postgres after retrying")
 
     logging.info("Connected to Postgres, creating tables")
 

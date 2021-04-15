@@ -4,7 +4,6 @@ PYTHON=python3.8
 
 .PHONY: all $(MAKECMDGOALS)
 
-
 # Formatting and typecheck
 
 format:
@@ -44,7 +43,10 @@ install-deps-dev: install-deps
 
 # Setup
 
-dev-setup: install-deps-dev install-git-hooks
+create-dotenv:
+	@[ -f .env ] || printf "POSTGRES_PASSWORD=$$(pwgen 32 1)\n" > .env
+
+dev-setup: install-deps-dev install-git-hooks create-dotenv
 
 # Running locally
 
