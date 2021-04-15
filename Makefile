@@ -58,4 +58,13 @@ run-frontend:
 run-all:
 	@${PYTHON} -m avmon.all
 
-# Running in docker
+# Running in Docker
+
+docker-up:
+	@docker-compose up --build -d
+
+docker-dbs:
+	@docker-compose -f docker-compose-dbs.yml up --build -d
+
+docker-down:
+	@docker-compose down -v || docker-compose kill
