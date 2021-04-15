@@ -1,9 +1,7 @@
+# Example config file
+
 # Default poll interval for endpoint
 interval = 60
-
-[[endpoint]]
-url = "https://aiven.io/"
-description = "Aiven"
 
 [[endpoint]]
 url = "https://google.com/"
@@ -18,14 +16,18 @@ regex = "datetime: \\d+-\\d+-\\d+T\\d+:\\d+"
 
 [[endpoint]]
 interval = 2
-url = "http://httpbin.org/status/200,500"
+url = "https://httpbin.org/status/200,500"
 description = "Randomly failing endpoint"
 
 [[endpoint]]
-url = "http://httpbin.org/status/400"
+url = "https://httpbin.org/status/400"
 description = "Always failing endpoint"
 
 [[endpoint]]
-timeout = 1.5
-url = "http://httpbin.org/delay/10"
-description = "Endpoint with a 10 second delay"
+timeout = 1.0
+url = "https://httpbin.org/delay/10"
+description = "Endpoint with a 10 second delay timeouts"
+
+[[endpoint]]
+url = "https://NXDOMAIN"
+description = "No such domain exists"
