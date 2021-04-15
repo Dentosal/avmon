@@ -1,5 +1,8 @@
+from typing import Dict, Any
+
 import asyncio
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+from aiokafka.helpers import create_ssl_context
 from aiokafka.errors import KafkaConnectionError
 from os import environ
 import logging
@@ -25,16 +28,34 @@ async def start(client) -> None:
 
 
 def bootstrap_servers() -> str:
-    return environ.get("AVMON_KAFKA", "localhost") + ":9092"
+    host = environ.get("AVMON_KAFKA", "localhost")
+    if ":" not in host:
+        host += ":9092"
+    return host
+
+
+def options() -> Dict[str, Any]:
+    result = {"bootstrap_servers": bootstrap_servers()}
+
+    if environ.get("AVMON_KAFKA_SSL", "0") != "0":
+        result["security_protocol"] = "SSL"
+        result["ssl_context"] = create_ssl_context(
+            cafile="./keys/ca-cert",
+            certfile="./keys/access-cert",
+            keyfile="./keys/access-key",
+            password="123123",
+        )
+
+    return result
 
 
 async def producer() -> AIOKafkaConsumer:
-    client = AIOKafkaProducer(bootstrap_servers=bootstrap_servers())
+    client = AIOKafkaProducer(**options())
     await start(client)
     return client
 
 
 async def consumer(topic: str) -> AIOKafkaConsumer:
-    client = AIOKafkaConsumer(topic, bootstrap_servers=bootstrap_servers())
+    client = AIOKafkaConsumer(topic, **options())
     await start(client)
     return client
