@@ -72,14 +72,14 @@ def make_table(columns: List[str]) -> HtmlTag:
 
 @routes.get("/")
 async def all(request: web.Request) -> web.Response:
-    conn = request.config_dict["DB"]
-    rows = await conn.fetch(
-        """
-        SELECT DISTINCT ON (url) url, reached, error, status, time_start, (time_end - time_start) as delay
-        FROM status_history
-        ORDER BY url ASC, time_start DESC
-        """
-    )
+    async with request.config_dict["DB"].acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT DISTINCT ON (url) url, reached, error, status, time_start, (time_end - time_start) as delay
+            FROM status_history
+            ORDER BY url ASC, time_start DESC
+            """
+        )
 
     table = make_table(
         ["Endpoint", "Reached", "Status", "Time (UTC)", "Delay", "History"]
@@ -141,18 +141,18 @@ async def single(request: web.Request) -> web.Response:
     assert url
     limit = max(1, int(request.query.get("limit", 10)))
 
-    conn = request.config_dict["DB"]
-    rows = await conn.fetch(
-        """
-        SELECT reached, error, status, time_start, (time_end - time_start) as delay
-        FROM status_history
-        WHERE url = $1
-        ORDER BY time_start DESC
-        LIMIT $2
-        """,
-        url,
-        limit,
-    )
+    async with request.config_dict["DB"].acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT reached, error, status, time_start, (time_end - time_start) as delay
+            FROM status_history
+            WHERE url = $1
+            ORDER BY time_start DESC
+            LIMIT $2
+            """,
+            url,
+            limit,
+        )
 
     table = make_table(["Reached", "Status", "Time (UTC)", "Delay"])
 
@@ -206,7 +206,7 @@ def init_app() -> web.Application:
 
 
 async def init_db(app: web.Application) -> AsyncIterator[None]:
-    db = await postgres.connect()
+    db = await postgres.create_pool()
     app["DB"] = db
     yield
     await db.close()

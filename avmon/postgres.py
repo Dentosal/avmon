@@ -21,10 +21,10 @@ async def init_sql(conn) -> None:
     )
 
 
-async def connect() -> asyncpg.Connection:
+async def _repeat_connect(fn) -> asyncpg.Connection:
     for _ in range(120):
         try:
-            conn = await asyncpg.connect(
+            conn = await fn(
                 user=environ.get("POSTGRES_USER", "user"),
                 password=environ["POSTGRES_PASSWORD"],
                 database=environ.get("POSTGRES_DB", "avmon"),
@@ -49,3 +49,11 @@ async def connect() -> asyncpg.Connection:
     logging.info("Tables created")
 
     return conn
+
+
+async def connect() -> asyncpg.Connection:
+    return await _repeat_connect(asyncpg.connect)
+
+
+async def create_pool() -> asyncpg.Connection:
+    return await _repeat_connect(asyncpg.create_pool)
