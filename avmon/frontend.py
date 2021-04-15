@@ -1,6 +1,6 @@
 """A simple visualization front-end."""
 
-from typing import AsyncIterator
+from typing import AsyncIterator, List, Union
 
 import datetime
 import urllib.parse
@@ -23,6 +23,53 @@ def make_html(body):
     return HTML_TEMPLATE.replace("$CONTENT", body)
 
 
+class HtmlTag:
+    def __init__(
+        self,
+        tag: str,
+        contents: Union["HtmlTag", str, List[Union["HtmlTag", str]]] = [],
+        **kwargs,
+    ) -> None:
+        self.tag = tag
+        self.args = kwargs
+        self.args["class"] = self.args.get("classes_", [])
+        self.contents = contents[:] if isinstance(contents, list) else [contents]
+
+    def append(self, value: Union[str, "HtmlTag"]) -> None:
+        self.contents.append(value)
+
+    @property
+    def classes(self) -> List[str]:
+        return self.args["class"]  # type: ignore
+
+    @property
+    def html(self) -> str:
+        result = f"<{self.tag}"
+        for key, value in self.args.items():
+            if isinstance(value, list):
+                value = " ".join(value)
+            assert '"' not in value
+            result += " " + key + '="' + value + '"'
+        result += f">"
+        for c in self.contents:
+            if isinstance(c, str):
+                result += c
+            else:
+                assert isinstance(c, HtmlTag), f"{c !r}"
+                result += c.html
+        result += f"</{self.tag}>"
+        return result
+
+
+def make_table(columns: List[str]) -> HtmlTag:
+    table = HtmlTag("table")
+    thead = HtmlTag("thead")
+    for c in columns:
+        thead.contents.append(HtmlTag("th", contents=c))
+    table.contents.append(thead)
+    return table
+
+
 @routes.get("/")
 async def all(request: web.Request) -> web.Response:
     conn = request.config_dict["DB"]
@@ -34,44 +81,64 @@ async def all(request: web.Request) -> web.Response:
         """
     )
 
-    body = "<h1>Endpoint status</h1>"
-    body += "<table><thead>"
-    for field in ["Endpoint", "Reached", "Status", "Time (UTC)", "Delay"]:
-        body += f"<th>{field}</th>"
-    body += "</thead>"
+    table = make_table(
+        ["Endpoint", "Reached", "Status", "Time (UTC)", "Delay", "History"]
+    )
     for row in rows:
-        if row["reached"]:
-            body += "<tr>"
-        else:
-            body += "<tr class=unreachable>"
-        body += (
-            '<td><a href="'
-            + urllib.parse.quote_plus(row["url"])
-            + '">'
-            + row["url"]
-            + "</a></td>"
-        )
-        body += f"<td class=reached>{row['reached']}</td>"
-        if row["reached"]:
-            if 200 <= row["status"] < 300:
-                body += f"<td class=ok>{row['status']}</td>"
-            elif 400 <= row["status"] < 600:
-                body += f"<td class=error>{row['status']}</td>"
-            else:
-                body += f"<td>{row['status']}</td>"
-        else:
-            body += f"<td class=error>{row['error']}</td>"
-        body += f"<td>{row['time_start']}</td>"
-        body += f"<td>{row['delay'].seconds:.2f}</td>"
-        body += "</tr>"
-    body += "</table>"
+        tr = HtmlTag("tr")
 
-    return web.Response(text=make_html(body), content_type="text/html", headers=HEADERS)
+        if not row["reached"]:
+            tr.classes.append("unreachable")
+
+        tr.append(
+            HtmlTag(
+                "td",
+                contents=HtmlTag("a", contents=row["url"], href=row["url"]),
+            )
+        )
+
+        tr.append(HtmlTag("td", contents=str(row["reached"]), classes=["reached"]))
+
+        status_cell = HtmlTag("td")
+        if row["reached"]:
+            status_cell.contents = [str(row["status"])]
+            status_cell = HtmlTag("td", contents=str(row["status"]))
+            if 200 <= row["status"] < 300:
+                status_cell.classes.append("ok")
+            elif 400 <= row["status"] < 600:
+                status_cell.classes.append("error")
+        else:
+            status_cell.contents = [row["error"]]
+            status_cell.classes.append("error")
+        tr.append(status_cell)
+
+        tr.append(HtmlTag("td", contents=str(row["time_start"])))
+        tr.append(HtmlTag("td", contents=f"{row['delay'].seconds:.2f}"))
+
+        tr.append(
+            HtmlTag(
+                "td",
+                contents=HtmlTag(
+                    "a",
+                    contents="Show history",
+                    href=urllib.parse.quote_plus(row["url"]),
+                ),
+            )
+        )
+
+        table.contents.append(tr)
+
+    return web.Response(
+        text=make_html("<h1>Endpoint status</h1>" + table.html),
+        content_type="text/html",
+        headers=HEADERS,
+    )
 
 
 @routes.get("/{url}")
 async def single(request: web.Request) -> web.Response:
     url = request.match_info.get("url")
+    assert url
     limit = max(1, int(request.query.get("limit", 10)))
 
     conn = request.config_dict["DB"]
@@ -87,38 +154,47 @@ async def single(request: web.Request) -> web.Response:
         limit,
     )
 
-    body = '<a href="/">Back to the front page</a>'
-    body += f"<h1>History for {url}</h1>"
-    body += "<table><thead>"
-    for field in ["Reached", "Status", "Time (UTC)", "Delay"]:
-        body += f"<th>{field}</th>"
-    body += "</thead>"
+    table = make_table(["Reached", "Status", "Time (UTC)", "Delay"])
+
     for row in rows:
+        tr = HtmlTag("tr")
+
+        if not row["reached"]:
+            tr.classes.append("unreachable")
+
+        tr.append(HtmlTag("td", contents=str(row["reached"]), classes=["reached"]))
+
+        status_cell = HtmlTag("td")
         if row["reached"]:
-            body += "<tr>"
-        else:
-            body += "<tr class=unreachable>"
-        body += f"<td class=reached>{row['reached']}</td>"
-        if row["reached"]:
+            status_cell.contents = [str(row["status"])]
+            status_cell = HtmlTag("td", contents=str(row["status"]))
             if 200 <= row["status"] < 300:
-                body += f"<td class=ok>{row['status']}</td>"
+                status_cell.classes.append("ok")
             elif 400 <= row["status"] < 600:
-                body += f"<td class=error>{row['status']}</td>"
-            else:
-                body += f"<td>{row['status']}</td>"
+                status_cell.classes.append("error")
         else:
-            body += f"<td class=error>{row['error']}</td>"
-        body += f"<td>{row['time_start']}</td>"
-        body += f"<td>{row['delay'].seconds:.2f}</td>"
-        body += "</tr>"
-    body += "</table>"
+            status_cell.contents = [row["error"]]
+            status_cell.classes.append("error")
+        tr.append(status_cell)
 
+        tr.append(HtmlTag("td", contents=str(row["time_start"])))
+        tr.append(HtmlTag("td", contents=f"{row['delay'].seconds:.2f}"))
+
+        table.contents.append(tr)
+
+    link = HtmlTag("a", contents=url, href=url)
+    prefix = f'<a href="/">Back to the front page</a><h1>History for {link.html}</h1>'
+    suffix = ""
     if len(rows) == limit:
-        body += f"<p>Showing first {limit} entries. "
-        body += '<a href="?limit=' + str(limit + 10) + '">Show more</a>'
-        body += "</p>"
+        suffix += f"<p>Showing first {limit} entries. "
+        suffix += '<a href="?limit=' + str(limit + 10) + '">Show more</a>'
+        suffix += "</p>"
 
-    return web.Response(text=make_html(body), content_type="text/html", headers=HEADERS)
+    return web.Response(
+        text=make_html(prefix + table.html + suffix),
+        content_type="text/html",
+        headers=HEADERS,
+    )
 
 
 def init_app() -> web.Application:
