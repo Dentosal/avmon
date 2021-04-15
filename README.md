@@ -4,11 +4,11 @@ A microservice-based HTTP endpoint monitor using [Python](https://python.org/) f
 
 ![Architecture diagram](docs/architecture.svg)
 
-Project is dockerized using single container, switched to perform different functions with the `AVMON_ROLE` environment variable.
+Project is dockerized using a single container, switched to perform different functions with the `AVMON_ROLE` environment variable.
 
 ## Running
 
-Minimal local system (one of each component) can be started with:
+A minimal local system (one of each component) can be started with:
 
 ```bash
 docker-compose up
