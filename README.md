@@ -22,6 +22,26 @@ make create-dotenv install-deps docker-dbs run-all
 
 In either case, navigate to https://localhost:8080/ for the visualization.
 
+### Using external databases
+
+If you are going to use external non-dockerized database, such as a cloud-hosted one, then the authentication must be configured using either a `.env` file or actual environment variables:
+
+```
+POSTGRES_HOST=host.example.org
+POSTGRES_PORT=5432
+POSTGRES_USER=avmon
+POSTGRES_PASSWORD=PASSWORD_HERE
+POSTGRES_DB=avmon
+
+AVMON_KAFKA=host.example.org:9092
+AVMON_KAFKA_SSL=1
+```
+
+Moreover, with `AVMON_KAFKA_SSL=1` you must pass the actual SSL keys and certificates. They should be placed in a folder named `keys` and the filenames should be `access-key`, `access-cert`, `ca-cert`.
+
+Remote databases must also be set up properly. Usually that means at least that PostgreSQL user and database must be created. Kafka should require no special setup, but make sure that it is configured to automatically create topics (`kafka.auto_create_topics_enable=1`) or manually create a topic called `messages`.
+
+
 ## Project structure
 
 * `avmon/` - Python packages
