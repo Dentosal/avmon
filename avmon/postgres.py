@@ -24,14 +24,6 @@ async def init_sql(conn) -> None:
 async def connect() -> asyncpg.Connection:
     for _ in range(120):
         try:
-            print(
-                dict(
-                    user=environ.get("POSTGRES_USER", "user"),
-                    password=environ["POSTGRES_PASSWORD"],
-                    database=environ.get("POSTGRES_DB", "avmon"),
-                    host=environ.get("POSTGRES_HOST", "127.0.0.1"),
-                )
-            )
             conn = await asyncpg.connect(
                 user=environ.get("POSTGRES_USER", "user"),
                 password=environ["POSTGRES_PASSWORD"],
