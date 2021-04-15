@@ -22,6 +22,12 @@ check: format-check type-check
 test:
 	@${PYTHON} -m pytest
 
+testx:
+	@${PYTHON} -m pytest -x
+
+testxs:
+	@${PYTHON} -m pytest -x -s
+
 # Git hooks
 
 pre-commit: check
