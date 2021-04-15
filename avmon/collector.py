@@ -13,6 +13,57 @@ from . import config
 from .message import EndpointStatus
 
 
+async def check_endpoint(
+    session: aiohttp.ClientSession, cfg: config.EndpointConfig
+) -> EndpointStatus:
+    start_real = time.time()
+    start_monotonic = time.monotonic()
+
+    try:
+        async with session.get(cfg.url, timeout=cfg.timeout) as response:
+            time_end = start_real + (time.monotonic() - start_monotonic)
+
+            # Check if regex can be found in the body
+            is_match = None
+            if r := cfg.regex:
+                text = await response.text()
+                is_match = bool(re.search(r, text))
+
+            return EndpointStatus(
+                url=cfg.url,
+                reached=True,
+                error=None,
+                status=response.status,
+                regex_match=is_match,
+                time_start=start_real,
+                time_end=time_end,
+            )
+
+    except Exception as e:
+        time_end = start_real + (time.monotonic() - start_monotonic)
+
+        message: str
+
+        if isinstance(e, TimeoutError):
+            message = "timeout"
+        elif isinstance(e, aiohttp.client_exceptions.ClientConnectorError):
+            message = "couldn't connect"
+        elif isinstance(e, aiohttp.client_exceptions.ServerDisconnectedError):
+            message = "server disconnected"
+        else:  # Unknown error, don't catch
+            raise
+
+        return EndpointStatus(
+            url=cfg.url,
+            reached=False,
+            error=message,
+            status=None,
+            regex_match=None,
+            time_start=start_real,
+            time_end=start_real + (time.monotonic() - start_monotonic),
+        )
+
+
 async def endpoint_task(
     cfg: "config.EndpointConfig", output: Callable[[EndpointStatus], Awaitable[None]]
 ) -> NoReturn:
@@ -20,62 +71,10 @@ async def endpoint_task(
 
     async with aiohttp.ClientSession() as session:
         while True:
-            start_real = time.time()
-            start_monotonic = time.monotonic()
-
-            result: EndpointStatus
-
-            try:
-                async with session.get(cfg.url, timeout=cfg.timeout) as response:
-                    # Check if regex can be found in the body
-                    is_match = None
-                    if r := cfg.regex:
-                        text = await response.text()
-                        is_match = bool(re.search(r, text))
-
-                    result = EndpointStatus(
-                        url=cfg.url,
-                        reached=True,
-                        error=None,
-                        status=response.status,
-                        regex_match=is_match,
-                        time_start=start_real,
-                        time_end=start_real + (time.monotonic() - start_monotonic),
-                    )
-            except TimeoutError:
-                result = EndpointStatus(
-                    url=cfg.url,
-                    reached=False,
-                    error="timeout",
-                    status=None,
-                    regex_match=None,
-                    time_start=start_real,
-                    time_end=start_real + (time.monotonic() - start_monotonic),
-                )
-            except aiohttp.client_exceptions.ClientConnectorError as e:
-                result = EndpointStatus(
-                    url=cfg.url,
-                    reached=False,
-                    error="couldn't connect",
-                    status=None,
-                    regex_match=None,
-                    time_start=start_real,
-                    time_end=start_real + (time.monotonic() - start_monotonic),
-                )
-            except aiohttp.client_exceptions.ServerDisconnectedError as e:
-                result = EndpointStatus(
-                    url=cfg.url,
-                    reached=False,
-                    error="server disconnected",
-                    status=None,
-                    regex_match=None,
-                    time_start=start_real,
-                    time_end=start_real + (time.monotonic() - start_monotonic),
-                )
-
+            start = time.monotonic()
+            result = await check_endpoint(session, cfg)
             await output(result)
-
-            duration = time.monotonic() - start_monotonic
+            duration = time.monotonic() - start
             await asyncio.sleep(max(0, cfg.interval - duration))
 
 
