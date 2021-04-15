@@ -45,3 +45,8 @@ make dev-setup
 ```
 
 this installs the dev dependencies locally, and installs git hooks that make sure you will not commit unformatted code or push untested code.
+
+
+## License
+
+MIT
